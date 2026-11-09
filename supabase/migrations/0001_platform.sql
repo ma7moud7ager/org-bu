@@ -10,7 +10,7 @@ returns boolean
 language sql
 stable
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
   select exists (select 1 from public.platform_admins where user_id = auth.uid())
 $$;

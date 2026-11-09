@@ -36,7 +36,7 @@ describe('invitations', () => {
 
   it('stores only the hash of the token', async () => {
     const t = await invite(admin.userId, pos);
-    const r = await db().query(`select 1 from invitations where token_hash = encode(digest($1, 'sha256'), 'hex')`, [t]);
+    const r = await db().query(`select 1 from invitations where token_hash = encode(extensions.digest($1, 'sha256'), 'hex')`, [t]);
     expect(r.rowCount).toBe(1);
     const raw = await db().query('select 1 from invitations where token_hash = $1', [t]);
     expect(raw.rowCount).toBe(0);

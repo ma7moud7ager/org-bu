@@ -2,7 +2,7 @@
 
 create or replace function public.org_units_guard()
 returns trigger
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 begin
   if tg_op = 'UPDATE' and old.parent_id is null and new.parent_id is not null then
@@ -29,7 +29,7 @@ create trigger org_units_guard
 
 create or replace function public.create_org_unit(p_parent uuid, p_type text, p_name text, p_catalog_id uuid default null)
 returns uuid
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   v_company uuid;
@@ -53,7 +53,7 @@ $$;
 
 create or replace function public.delete_org_unit(p_unit uuid, p_replacement uuid default null)
 returns void
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   v_unit public.org_units;

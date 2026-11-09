@@ -22,12 +22,12 @@ create policy invitations_select on public.invitations for select to authenticat
 
 create or replace function public.hash_token(p_token text)
 returns text
-language sql immutable
+language sql immutable set search_path = public, extensions
 as $$ select encode(digest(p_token, 'sha256'), 'hex') $$;
 
 create or replace function public.create_invitation(p_position uuid, p_sent_to text, p_ttl_days int default 7)
 returns text
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   v_pos public.positions;
@@ -57,7 +57,7 @@ $$;
 -- Returns the invitation row after checking it is usable; locks it when p_lock.
 create or replace function private.usable_invitation(p_token text, p_lock boolean)
 returns public.invitations
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   v_inv public.invitations;
@@ -76,7 +76,7 @@ $$;
 
 create or replace function public.preview_invitation(p_token text)
 returns table (company_name text, unit_name text, position_title text)
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   v_inv public.invitations := private.usable_invitation(p_token, false);
@@ -94,7 +94,7 @@ create or replace function public.accept_invitation(
   p_token text, p_full_name text, p_birth_date date, p_gender text, p_nationality text,
   p_identity_type text, p_identity_number text, p_iqama_expiry date, p_entry_date date, p_email text
 ) returns uuid
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   v_user uuid := auth.uid();

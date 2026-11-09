@@ -2,21 +2,21 @@
 
 create or replace function public.current_employee()
 returns public.employees
-language sql stable security definer set search_path = public
+language sql stable security definer set search_path = public, extensions
 as $$
   select * from public.employees where user_id = auth.uid() and status = 'active' limit 1
 $$;
 
 create or replace function public.current_company_id()
 returns uuid
-language sql stable security definer set search_path = public
+language sql stable security definer set search_path = public, extensions
 as $$
   select company_id from public.employees where user_id = auth.uid() and status = 'active' limit 1
 $$;
 
 create or replace function public.unit_path(p_unit uuid)
 returns uuid[]
-language sql stable security definer set search_path = public
+language sql stable security definer set search_path = public, extensions
 as $$
   with recursive up as (
     select id, parent_id, 0 as depth from public.org_units where id = p_unit
@@ -29,7 +29,7 @@ $$;
 
 create or replace function public.unit_branch(p_unit uuid)
 returns uuid
-language sql stable security definer set search_path = public
+language sql stable security definer set search_path = public, extensions
 as $$
   with recursive up as (
     select id, parent_id, type, 0 as depth from public.org_units where id = p_unit
@@ -42,21 +42,21 @@ $$;
 
 create or replace function public.position_unit(p_position uuid)
 returns uuid
-language sql stable security definer set search_path = public
+language sql stable security definer set search_path = public, extensions
 as $$
   select org_unit_id from public.positions where id = p_position
 $$;
 
 create or replace function public.company_root(p_company uuid)
 returns uuid
-language sql stable security definer set search_path = public
+language sql stable security definer set search_path = public, extensions
 as $$
   select id from public.org_units where company_id = p_company and parent_id is null
 $$;
 
 create or replace function public.company_is_writable(p_company uuid)
 returns boolean
-language sql stable security definer set search_path = public
+language sql stable security definer set search_path = public, extensions
 as $$
   select exists (
     select 1 from public.subscriptions s
@@ -71,7 +71,7 @@ $$;
 -- Mirrors hasPermission() in packages/shared/src/permissions.ts.
 create or replace function public.has_permission(p_permission text, p_target_unit uuid, p_target_employee uuid default null)
 returns boolean
-language plpgsql stable security definer set search_path = public
+language plpgsql stable security definer set search_path = public, extensions
 as $$
 declare
   v_emp public.employees;
@@ -117,7 +117,7 @@ $$;
 -- Raise a stable error code (mapped to Arabic in packages/shared/src/errors.ts).
 create or replace function public.raise_org(p_code text)
 returns void
-language plpgsql
+language plpgsql set search_path = public
 as $$
 begin
   raise exception using errcode = 'P0001', message = p_code;

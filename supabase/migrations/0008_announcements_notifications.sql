@@ -40,7 +40,7 @@ grant update (read_at) on public.notifications to authenticated;
 
 create or replace function public.current_unit_path()
 returns uuid[]
-language sql stable security definer set search_path = public
+language sql stable security definer set search_path = public, extensions
 as $$
   select public.unit_path(public.position_unit((public.current_employee()).position_id))
 $$;
@@ -58,7 +58,7 @@ create policy notifications_update on public.notifications for update to authent
 create or replace function public.publish_announcement(p_kind text, p_title text, p_body text, p_audience uuid[],
                                                        p_pinned boolean default false)
 returns uuid
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   v_me public.employees := public.current_employee();
@@ -103,7 +103,7 @@ $$;
 
 create or replace function public.mark_announcement_read(p_announcement uuid)
 returns void
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   v_me public.employees := public.current_employee();

@@ -3,7 +3,7 @@
 -- Mirrors DEFAULT_ROLE_GRANTS in packages/shared/src/permissions.ts (a test asserts equality).
 create or replace function public.default_role_grants()
 returns table (system_key text, permission text, scope text)
-language sql immutable
+language sql immutable set search_path = public
 as $$
   select * from (values
     ('company_admin', 'structure.manage', 'company'),
@@ -43,7 +43,7 @@ create or replace function public.register_company(
   p_admin_phone text,
   p_admin_email text
 ) returns uuid
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   v_user uuid := auth.uid();

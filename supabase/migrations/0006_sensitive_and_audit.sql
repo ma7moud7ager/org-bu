@@ -6,7 +6,7 @@ revoke all on schema private from public, anon, authenticated;
 -- Key source: Supabase Vault secret 'identity_key' when available, else the app.identity_key setting (local tests).
 create or replace function private.identity_key()
 returns text
-language plpgsql stable security definer set search_path = public
+language plpgsql stable security definer set search_path = public, extensions
 as $$
 declare
   v_key text;
@@ -51,7 +51,7 @@ create policy audit_log_select on public.audit_log for select to authenticated
 create or replace function public.write_audit(p_company uuid, p_action text, p_entity text, p_entity_id uuid,
                                               p_before jsonb default null, p_after jsonb default null)
 returns void
-language sql security definer set search_path = public
+language sql security definer set search_path = public, extensions
 as $$
   insert into public.audit_log (company_id, actor_user_id, action, entity, entity_id, before, after)
   values (p_company, auth.uid(), p_action, p_entity, p_entity_id, p_before, p_after)
@@ -60,7 +60,7 @@ revoke execute on function public.write_audit(uuid, text, text, uuid, jsonb, jso
 
 create or replace function public.validate_identity(p_type text, p_number text)
 returns boolean
-language sql immutable
+language sql immutable set search_path = public
 as $$
   select case p_type
     when 'national_id' then p_number ~ '^1\d{9}$'
@@ -73,7 +73,7 @@ $$;
 create or replace function public.set_employee_identity(p_employee uuid, p_identity_type text, p_number text,
                                                         p_iqama_expiry date, p_entry_date date)
 returns void
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   v_emp public.employees;
@@ -106,7 +106,7 @@ $$;
 
 create or replace function public.get_employee_identity_number(p_employee uuid)
 returns text
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   v_emp public.employees;
@@ -130,7 +130,7 @@ grant execute on function public.get_employee_identity_number(uuid) to authentic
 -- Audit triggers.
 create or replace function public.audit_trigger()
 returns trigger
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   v_company uuid;
