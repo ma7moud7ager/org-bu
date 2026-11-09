@@ -9,6 +9,16 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": { "zod": "^3.23.8" },
-  "devDependencies": { "vitest": "^2.1.0", "@types/node": "^22.0.0", "typescript": "^5.6.0" }
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./invite": "./src/invite.ts"
+  }
 }
