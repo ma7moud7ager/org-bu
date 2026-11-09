@@ -1,0 +1,6 @@
+.superpowers/
+node_modules/
+.turbo/
+dist/
+.env*
+.pgdata/
