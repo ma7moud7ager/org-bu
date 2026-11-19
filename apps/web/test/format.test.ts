@@ -14,3 +14,14 @@ describe('validateContract', () => {
     expect(validateContract(null, null)).toBe(true);
   });
 });
+
+import { subscriptionBadge } from '@/lib/format';
+
+describe('subscriptionBadge', () => {
+  const now = new Date('2026-06-01T00:00:00Z');
+  it('trial', () => expect(subscriptionBadge('trial', null, now)).toEqual({ label: 'تجريبي', tone: 'amber' }));
+  it('active', () => expect(subscriptionBadge('active', '2026-12-01T00:00:00Z', now)).toEqual({ label: 'نشط', tone: 'green' }));
+  it('active but past end date', () => expect(subscriptionBadge('active', '2026-05-01T00:00:00Z', now)).toEqual({ label: 'منتهي', tone: 'red' }));
+  it('expired', () => expect(subscriptionBadge('expired', null, now)).toEqual({ label: 'منتهي', tone: 'red' }));
+  it('cancelled', () => expect(subscriptionBadge('cancelled', null, now)).toEqual({ label: 'ملغي', tone: 'gray' }));
+});
