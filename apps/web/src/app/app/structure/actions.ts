@@ -35,3 +35,25 @@ export async function deleteUnit(id: string, replacementId: string | null): Prom
   const supabase = await createServerSupabase();
   return done(await callRpc<null>(supabase, 'delete_org_unit', { p_unit: id, p_replacement: replacementId }));
 }
+
+export async function createPosition(unitId: string, title: string, roleId: string, isManager: boolean): Promise<Result<string>> {
+  if (title.trim().length < 2 || !roleId) return fail('ORG_VALIDATION');
+  const supabase = await createServerSupabase();
+  const { data: company } = await supabase.rpc('current_company_id');
+  const { data, error } = await supabase
+    .from('positions')
+    .insert({ company_id: company, org_unit_id: unitId, title: title.trim(), role_id: roleId, is_manager: isManager })
+    .select('id')
+    .single();
+  if (error || !data) return { ok: false, error: toArabicError(error) };
+  if (isManager) {
+    const r = await updateUnit(unitId, { manager_position_id: data.id });
+    if (!r.ok) return r;
+  }
+  return done({ ok: true, data: data.id as string });
+}
+
+export async function createInvite(positionId: string, sentTo: string): Promise<Result<string>> {
+  const supabase = await createServerSupabase();
+  return callRpc<string>(supabase, 'create_invitation', { p_position: positionId, p_sent_to: sentTo || null, p_ttl_days: 7 });
+}

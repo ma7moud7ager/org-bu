@@ -23,9 +23,10 @@ export function OrgTree({ tree, bundle, positionDetails, roles }: { tree: TreeNo
   const [dialog, setDialog] = useState<Dialog>(null);
   const rows = flatten(tree);
   const allUnits = rows.map((r) => r.node);
-  const canManage = (n: TreeNode) =>
+  const can = (permission: 'structure.manage' | 'employees.invite', n: TreeNode) =>
     bundle.writable &&
-    hasPermission(bundle.grants, 'structure.manage', bundle.actor, { unitPath: pathOf(allUnits, n.id), branchId: branchOfNode(allUnits, n.id) });
+    hasPermission(bundle.grants, permission, bundle.actor, { unitPath: pathOf(allUnits, n.id), branchId: branchOfNode(allUnits, n.id) });
+  const canManage = (n: TreeNode) => can('structure.manage', n);
 
   return (
     <div className="space-y-2">
@@ -45,7 +46,7 @@ export function OrgTree({ tree, bundle, positionDetails, roles }: { tree: TreeNo
               </span>
             ) : null}
           </div>
-          <PositionsPanel node={node} bundle={bundle} details={positionDetails} roles={roles} canManage={canManage(node)} />
+          <PositionsPanel node={node} bundle={bundle} details={positionDetails} roles={roles} canManage={canManage(node)} canInvite={can('employees.invite', node)} />
         </div>
       ))}
       {dialog ? <UnitDialog dialog={dialog} tree={tree} allUnits={allUnits} onClose={() => setDialog(null)} /> : null}
