@@ -11,6 +11,9 @@ export default async function OnboardingPage() {
         <h1 className="text-2xl font-bold text-teal-800">سجّل شركتك</h1>
         <p className="text-sm text-slate-500">فترة تجريبية مجانية لمدة 14 يومًا.</p>
       </div>
+      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        هل أنت موظف في شركة مسجلة على المنصة؟ لا تسجّل شركة جديدة. اطلب من مديرك أو من الموارد البشرية رابط دعوة وافتحه للانضمام إلى شركتك.
+      </div>
       <OnboardingForm catalog={(data ?? []) as CatalogItem[]} action={registerCompany} />
     </main>
   );
