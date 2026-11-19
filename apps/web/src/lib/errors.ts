@@ -4,6 +4,8 @@ export type Result<T> = { ok: true; data: T } | { ok: false; error: string };
 
 export function toArabicError(e: unknown): string {
   const message = typeof e === 'object' && e !== null && 'message' in e ? String((e as { message: unknown }).message) : '';
+  const code = typeof e === 'object' && e !== null && 'code' in e ? String((e as { code: unknown }).code) : '';
+  if (code === 'sms_send_failed') return 'تعذر إرسال رسالة التحقق. حاول مرة أخرى بعد قليل.';
   if ((ERROR_CODES as readonly string[]).includes(message)) return messageFor(message);
   if (/row-level security|permission denied/i.test(message)) return messageFor('ORG_FORBIDDEN');
   return messageFor('UNKNOWN');

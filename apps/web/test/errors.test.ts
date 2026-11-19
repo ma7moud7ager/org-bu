@@ -31,3 +31,9 @@ describe('callRpc', () => {
     expect(await callRpc(client, 'f', {})).toEqual({ ok: false, error: 'حدث خطأ غير متوقع' });
   });
 });
+
+describe('auth errors', () => {
+  it('SMS provider failure has a clear Arabic message', () => {
+    expect(toArabicError({ message: 'Error sending confirmation OTP to provider', code: 'sms_send_failed' })).toBe('تعذر إرسال رسالة التحقق. حاول مرة أخرى بعد قليل.');
+  });
+});
