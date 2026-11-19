@@ -46,3 +46,16 @@ export function deleteRequirement(node: TreeNode, isRoot: boolean): DeleteRequir
   if (node.isFixed) return 'fixed';
   return 'ok';
 }
+
+/** Every node with its root→node path and nearest branch, for permission checks. */
+export function withPaths(tree: TreeNode): Array<{ node: TreeNode; unitPath: string[]; branchId: string | null }> {
+  const out: Array<{ node: TreeNode; unitPath: string[]; branchId: string | null }> = [];
+  const walk = (n: TreeNode, path: string[], branch: string | null) => {
+    const p = [...path, n.id];
+    const b = n.type === 'branch' ? n.id : branch;
+    out.push({ node: n, unitPath: p, branchId: b });
+    n.children.forEach((c) => walk(c, p, b));
+  };
+  walk(tree, [], null);
+  return out;
+}
