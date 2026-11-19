@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { maskIdentity } from '@/lib/format';
+import { EMPLOYEES_LIST_SELECT } from '@/lib/queries';
 
 type Row = { id: string; full_name: string; phone: string; identity_last4: string | null; status: string; positions: { title: string; org_units: { name: string } | null } | null };
 
 export default async function EmployeesPage() {
   const supabase = await createServerSupabase();
-  const { data } = await supabase.from('employees').select('id, full_name, phone, identity_last4, status, positions(title, org_units(name))').order('full_name');
+  const { data } = await supabase.from('employees').select(EMPLOYEES_LIST_SELECT).order('full_name');
   const rows = (data ?? []) as unknown as Row[];
   return (
     <div className="space-y-4">
