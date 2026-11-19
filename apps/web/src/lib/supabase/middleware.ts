@@ -14,6 +14,8 @@ export async function updateSession(req: NextRequest) {
       },
     },
   });
-  const { data } = await supabase.auth.getUser();
-  return { response: () => response, supabase, userId: data.user?.id ?? null };
+  // getClaims verifies the JWT locally when the project uses asymmetric signing keys (no auth round-trip).
+  const { data } = await supabase.auth.getClaims();
+  const userId = (data?.claims?.sub as string | undefined) ?? null;
+  return { response: () => response, supabase, userId };
 }

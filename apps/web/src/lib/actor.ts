@@ -18,7 +18,7 @@ export const toOrgUnit = (u: UnitRow): OrgUnit => ({
 export const loadActor = cache(async (): Promise<ActorBundle | null> => {
   const supabase = await createServerSupabase();
   const { data: emp } = await supabase.rpc('current_employee');
-  const e = emp as { id: string; full_name: string; company_id: string; position_id: string } | null;
+  const e = emp as { id: string; full_name: string; company_id: string; position_id: string; user_id: string } | null;
   if (!e?.id) return null;
 
   const [pos, units, company, writable] = await Promise.all([
@@ -32,7 +32,7 @@ export const loadActor = cache(async (): Promise<ActorBundle | null> => {
   const orgUnits = ((units.data ?? []) as UnitRow[]).map(toOrgUnit);
   const unitId = p?.org_unit_id ?? '';
   return {
-    employee: { id: e.id, fullName: e.full_name, companyId: e.company_id, positionId: e.position_id },
+    employee: { id: e.id, fullName: e.full_name, companyId: e.company_id, positionId: e.position_id, userId: e.user_id },
     actor: { employeeId: e.id, unitPath: unitId ? unitPath(orgUnits, unitId) : [], branchId: unitId ? branchOf(orgUnits, unitId) : null },
     grants: p?.role_permissions?.role_permissions ?? [],
     companyName: (company.data as { legal_name: string } | null)?.legal_name ?? '',

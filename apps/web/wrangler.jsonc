@@ -1,0 +1,15 @@
+{
+  // org BU web — Next.js on Cloudflare Workers via OpenNext
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "org-bu",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  "vars": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://ziwyfxslsmzqddirbnod.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_rLWf_iX2KECujPuZekORFw_Fj43exSw"
+  }
+}

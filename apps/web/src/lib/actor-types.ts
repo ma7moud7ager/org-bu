@@ -1,7 +1,7 @@
 import type { ActorContext, Grant } from '@orgbu/shared';
 
 export type ActorBundle = {
-  employee: { id: string; fullName: string; companyId: string; positionId: string };
+  employee: { id: string; fullName: string; companyId: string; positionId: string; userId?: string };
   actor: ActorContext;
   grants: Grant[];
   companyName: string;

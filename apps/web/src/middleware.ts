@@ -7,9 +7,10 @@ export async function middleware(req: NextRequest) {
   let hasEmployee = false;
   let isPlatformAdmin = false;
   if (userId) {
-    const [emp, admin] = await Promise.all([supabase.rpc('current_employee'), supabase.rpc('is_platform_admin')]);
-    hasEmployee = !!(emp.data as { id?: string } | null)?.id;
-    isPlatformAdmin = admin.data === true;
+    const { data } = await supabase.rpc('session_state');
+    const row = (data as Array<{ has_employee: boolean; is_platform_admin: boolean }> | null)?.[0];
+    hasEmployee = row?.has_employee === true;
+    isPlatformAdmin = row?.is_platform_admin === true;
   }
   const target = routeFor(req.nextUrl.pathname, { userId, hasEmployee, isPlatformAdmin });
   if (target) return NextResponse.redirect(new URL(target, req.url));
