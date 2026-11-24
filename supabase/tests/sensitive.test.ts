@@ -16,7 +16,7 @@ describe('sensitive identity data and audit', () => {
   });
 
   const setOwnIqama = (num: string) =>
-    asUser(staff.userId, (c) => c.query(`select set_employee_identity($1, 'iqama', $2, '2030-01-01', null)`, [staff.employeeId, num]));
+    asUser(staff.userId, (c) => c.query(`select update_employee_document($1, 'iqama', $2, '2030-01-01', null)`, [staff.employeeId, num]));
 
   it('employee stores own iqama encrypted with last4', async () => {
     await setOwnIqama('2123456789');
@@ -28,7 +28,7 @@ describe('sensitive identity data and audit', () => {
     expect(await errorOf(setOwnIqama('1123456789'))).toBe('ORG_VALIDATION');
   });
   it('employee cannot set another employee identity', async () => {
-    expect(await errorOf(asUser(staff.userId, (c) => c.query(`select set_employee_identity($1, 'iqama', '2123456789', '2030-01-01', null)`, [hr.employeeId])))).toBe('ORG_FORBIDDEN');
+    expect(await errorOf(asUser(staff.userId, (c) => c.query(`select update_employee_document($1, 'iqama', '2123456789', '2030-01-01', null)`, [hr.employeeId])))).toBe('ORG_FORBIDDEN');
   });
   it('hr reads the full number and it is audited', async () => {
     await setOwnIqama('2123456789');

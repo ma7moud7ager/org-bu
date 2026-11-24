@@ -83,3 +83,13 @@ describe('profile edits', () => {
     expect(await errorOf(editProfile(hr2, worker.employeeId))).toBe('ORG_FORBIDDEN');
   });
 });
+
+describe('set_employee_identity is internal', () => {
+  beforeEach(resetDb);
+  it('cannot be called through the API (self-updates must go through update_my_document)', async () => {
+    const co = await seedCompany();
+    const w = await addEmployee(co, co.rootId, 'employee');
+    expect(await errorOf(asUser(w.userId, (c) =>
+      c.query(`select set_employee_identity($1,'national_id','1123456789',null,null)`, [w.employeeId])))).toMatch(/permission denied/);
+  });
+});
