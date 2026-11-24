@@ -47,3 +47,14 @@ describe('native bridge inside the app', () => {
     expect(await deviceInfo()).toBeNull();
   });
 });
+
+import { safeAppPath } from '@/lib/native';
+describe('safeAppPath', () => {
+  it('only allows same-site paths from push data', () => {
+    expect(safeAppPath('/app/requests')).toBe('/app/requests');
+    expect(safeAppPath('//evil.example/x')).toBeNull();
+    expect(safeAppPath('https://evil.example')).toBeNull();
+    expect(safeAppPath('/\\evil.example')).toBeNull();
+    expect(safeAppPath(undefined)).toBeNull();
+  });
+});

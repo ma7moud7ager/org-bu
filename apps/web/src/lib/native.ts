@@ -84,8 +84,8 @@ export async function registerPush(onToken: (token: string) => void, onTap: (hre
     if (perm.receive !== 'granted') return false;
     await p.addListener?.('registration', (t) => onToken((t as { value: string }).value));
     await p.addListener?.('pushNotificationActionPerformed', (a) => {
-      const href = (a as { notification?: { data?: { href?: string } } }).notification?.data?.href;
-      if (href && href.startsWith('/')) onTap(href);
+      const href = safeAppPath((a as { notification?: { data?: { href?: string } } }).notification?.data?.href);
+      if (href) onTap(href);
     });
     await p.register();
     return true;
@@ -112,4 +112,10 @@ export function onBackButton(cb: (canGoBack: boolean) => void): void {
 
 export async function exitApp(): Promise<void> {
   await plugin('App')?.exitApp?.();
+}
+
+/** A push link is followed only when it is a path on this site (never "//host" or a full URL). */
+export function safeAppPath(href: string | undefined | null): string | null {
+  if (!href || !href.startsWith('/') || href.startsWith('//') || href.startsWith('/\\')) return null;
+  return href;
 }
