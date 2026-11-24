@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "729690219974",
+    "project_id": "org-bu",
+    "storage_bucket": "org-bu.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:729690219974:android:024586bb56b620dbf27ec7",
+        "android_client_info": {
+          "package_name": "com.orgbu.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjcryLcl__FHxwO7hVJpIvdUzvkw0NvH8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
