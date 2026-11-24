@@ -10,6 +10,10 @@ export const PERMISSIONS = [
   'employees.view_sensitive',
   'announcements.publish',
   'subscription.view',
+  'employees.transfer',
+  'employees.request_terminate',
+  'employees.request_transfer',
+  'requests.decide',
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -19,7 +23,10 @@ export type RoleKey = 'company_admin' | 'hr' | 'finance' | 'branch_manager' | 'u
 const at = (scope: Scope, ...perms: Permission[]): Grant[] => perms.map((permission) => ({ permission, scope }));
 
 export const DEFAULT_ROLE_GRANTS: Record<RoleKey, Grant[]> = {
-  company_admin: at('company', ...PERMISSIONS),
+  company_admin: at(
+    'company',
+    ...PERMISSIONS.filter((p) => p !== 'employees.request_terminate' && p !== 'employees.request_transfer'),
+  ),
   hr: at(
     'company',
     'employees.invite',
@@ -29,9 +36,19 @@ export const DEFAULT_ROLE_GRANTS: Record<RoleKey, Grant[]> = {
     'employees.view_sensitive',
     'announcements.publish',
     'structure.manage',
+    'employees.transfer',
+    'requests.decide',
   ),
   finance: at('company', 'employees.view'),
-  branch_manager: at('branch', 'employees.invite', 'employees.view', 'employees.edit', 'announcements.publish'),
+  branch_manager: at(
+    'branch',
+    'employees.invite',
+    'employees.view',
+    'employees.edit',
+    'announcements.publish',
+    'employees.request_terminate',
+    'employees.request_transfer',
+  ),
   unit_manager: at('unit', 'employees.view', 'announcements.publish'),
   employee: at('self', 'employees.view'),
 };

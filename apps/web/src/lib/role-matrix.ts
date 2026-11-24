@@ -10,6 +10,10 @@ export const PERMISSION_LABELS_AR: Record<Permission, string> = {
   'employees.view_sensitive': 'عرض رقم الهوية كاملًا',
   'announcements.publish': 'نشر الأخبار والقرارات',
   'subscription.view': 'عرض الاشتراك',
+  'employees.transfer': 'نقل الموظفين',
+  'employees.request_terminate': 'رفع طلب إنهاء خدمة',
+  'employees.request_transfer': 'رفع طلب نقل',
+  'requests.decide': 'البت في الطلبات',
 };
 
 export const SCOPE_LABELS_AR: Record<Scope, string> = {

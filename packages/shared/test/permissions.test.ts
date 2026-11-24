@@ -28,3 +28,17 @@ describe('hasPermission', () => {
     expect(hasPermission(g.finance, 'employees.edit', actor({}), { unitPath: ['root'], branchId: null })).toBe(false);
   });
 });
+
+describe('phase 2a grants', () => {
+  it('hr and company_admin decide requests and transfer company-wide', () => {
+    for (const role of [g.hr, g.company_admin]) {
+      expect(role).toContainEqual({ permission: 'requests.decide', scope: 'company' });
+      expect(role).toContainEqual({ permission: 'employees.transfer', scope: 'company' });
+    }
+  });
+  it('branch_manager requests termination/transfer within the branch only', () => {
+    expect(g.branch_manager).toContainEqual({ permission: 'employees.request_terminate', scope: 'branch' });
+    expect(g.branch_manager).toContainEqual({ permission: 'employees.request_transfer', scope: 'branch' });
+    expect(g.branch_manager.some((x) => x.permission === 'employees.terminate')).toBe(false);
+  });
+});
