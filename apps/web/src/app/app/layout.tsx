@@ -13,10 +13,10 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
     <NativeProvider>
     <div className="flex min-h-screen">
       <Sidebar items={navItemsFor(bundle)} companyName={bundle.companyName} userName={bundle.employee.fullName} />
-      <div className="flex-1">
-        <header className="flex justify-end border-b border-slate-200 bg-white px-6 py-2">{bundle.employee.userId ? <NotificationBell userId={bundle.employee.userId} /> : null}</header>
+      <div className="min-w-0 flex-1">
+        <header className="flex justify-end border-b border-slate-200 bg-white px-4 py-2 md:px-6">{bundle.employee.userId ? <NotificationBell userId={bundle.employee.userId} /> : null}</header>
         {!bundle.writable ? <div className="bg-amber-100 px-6 py-2 text-sm text-amber-900">{messageFor('ORG_SUBSCRIPTION_INACTIVE')}</div> : null}
-        <main className="p-6">{children}</main>
+        <main className="p-4 md:p-6">{children}</main>
       </div>
     </div>
     </NativeProvider>

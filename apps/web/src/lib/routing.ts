@@ -1,6 +1,7 @@
 export type SessionState = { userId: string | null; hasEmployee: boolean; isPlatformAdmin: boolean; isTerminated: boolean };
 
-const isPublic = (path: string) => path === '/login' || path.startsWith('/invite/');
+const isPublic = (path: string) =>
+  path === '/login' || path === '/download' || path.startsWith('/invite/') || path.startsWith('/downloads/') || path.startsWith('/.well-known/');
 
 export function routeFor(path: string, s: SessionState): string | null {
   if (s.userId && s.hasEmployee && (path === '/login' || path === '/onboarding' || path === '/ended')) return '/app';

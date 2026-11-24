@@ -12,6 +12,7 @@ import { EmployeeEditForm } from '@/components/employee-edit-form';
 import { TerminateDialog } from '@/components/terminate-dialog';
 import { TransferDialog, type UnitOption } from '@/components/transfer-dialog';
 import { ScheduledActionBanner } from '@/components/scheduled-action-banner';
+import { EmployeeDeviceCard, type EmployeeDevice } from '@/components/employee-device-card';
 
 type Emp = {
   id: string; full_name: string; phone: string; email: string | null; birth_date: string | null; gender: string | null; nationality: string | null;
@@ -36,10 +37,11 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
   const e = data as unknown as Emp | null;
   if (!e) notFound();
   const unitId = e.positions?.org_unit_id;
-  const [{ data: path }, { data: branch }, { data: sched }] = await Promise.all([
+  const [{ data: path }, { data: branch }, { data: sched }, { data: device }] = await Promise.all([
     unitId ? supabase.rpc('unit_path', { p_unit: unitId }) : Promise.resolve({ data: [] }),
     unitId ? supabase.rpc('unit_branch', { p_unit: unitId }) : Promise.resolve({ data: null }),
     supabase.from('scheduled_actions').select('id, kind, run_at').eq('employee_id', id).eq('status', 'scheduled').order('run_at'),
+    supabase.rpc('employee_device', { p_employee: id }),
   ]);
   const target = { employeeId: e.id, unitPath: (path as string[]) ?? [], branchId: (branch as string | null) ?? null };
   const active = e.status === 'active';
@@ -107,6 +109,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
         </dl>
         {canSee ? <EmployeeSensitive employeeId={e.id} /> : null}
       </Card>
+      {active && device ? <EmployeeDeviceCard employeeId={e.id} device={device as EmployeeDevice} canUnbind={modes.edit} /> : null}
       {modes.terminate || modes.transfer ? (
         <div className="flex flex-col gap-3">
           {modes.transfer && transferProps && !scheduled.some((s) => s.kind === 'transfer') ? (

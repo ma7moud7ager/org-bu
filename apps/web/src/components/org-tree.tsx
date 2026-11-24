@@ -6,6 +6,7 @@ import { deleteRequirement, flatten, subtreeIds, type TreeNode } from '@/lib/tre
 import { createUnit, deleteUnit, moveUnit, renameUnit } from '@/app/app/structure/actions';
 import { Button, ErrorText, Input } from '@/components/ui';
 import { PositionsPanel } from '@/components/positions-panel';
+import { UnitLocationForm, type UnitGeo } from '@/components/unit-location-form';
 
 export type RoleRow = { id: string; name: string; system_key: string | null; role_permissions: { permission: string }[] };
 export type PositionDetail = { title: string; employeeName: string | null; roleId: string; showPhone: boolean };
@@ -19,7 +20,7 @@ type Dialog =
   | { kind: 'delete'; node: TreeNode }
   | null;
 
-export function OrgTree({ tree, bundle, positionDetails, roles }: { tree: TreeNode; bundle: ActorBundle; positionDetails: Record<string, PositionDetail>; roles: RoleRow[] }) {
+export function OrgTree({ tree, bundle, geo = {}, positionDetails, roles }: { tree: TreeNode; bundle: ActorBundle; geo?: Record<string, UnitGeo>; positionDetails: Record<string, PositionDetail>; roles: RoleRow[] }) {
   const [dialog, setDialog] = useState<Dialog>(null);
   const rows = flatten(tree);
   const allUnits = rows.map((r) => r.node);
@@ -46,6 +47,10 @@ export function OrgTree({ tree, bundle, positionDetails, roles }: { tree: TreeNo
               </span>
             ) : null}
           </div>
+          {(node.type === 'branch' || !node.parentId) && (canManage(node) || geo[node.id]?.lat != null) ? (
+            canManage(node) ? <UnitLocationForm unitId={node.id} geo={geo[node.id] ?? { lat: null, lng: null, radius: 100 }} />
+              : <p className="text-xs text-slate-500">📍 موقع العمل محدد</p>
+          ) : null}
           <PositionsPanel node={node} bundle={bundle} details={positionDetails} roles={roles} canManage={canManage(node)} canInvite={can('employees.invite', node)} />
         </div>
       ))}

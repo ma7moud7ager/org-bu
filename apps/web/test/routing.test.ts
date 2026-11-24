@@ -13,6 +13,10 @@ describe('routeFor', () => {
   it('public paths are open', () => {
     expect(routeFor('/login', anon)).toBeNull();
     expect(routeFor('/invite/abc', anon)).toBeNull();
+    expect(routeFor('/download', anon)).toBeNull();
+    expect(routeFor('/download', member)).toBeNull();
+    expect(routeFor('/downloads/org-bu.apk', anon)).toBeNull();
+    expect(routeFor('/.well-known/assetlinks.json', anon)).toBeNull();
   });
   it('anonymous users go to login with next', () => {
     expect(routeFor('/app/structure', anon)).toBe('/login?next=%2Fapp%2Fstructure');
