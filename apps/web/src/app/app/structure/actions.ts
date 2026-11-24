@@ -36,13 +36,13 @@ export async function deleteUnit(id: string, replacementId: string | null): Prom
   return done(await callRpc<null>(supabase, 'delete_org_unit', { p_unit: id, p_replacement: replacementId }));
 }
 
-export async function createPosition(unitId: string, title: string, roleId: string, isManager: boolean): Promise<Result<string>> {
+export async function createPosition(unitId: string, title: string, roleId: string, isManager: boolean, showPhone = false): Promise<Result<string>> {
   if (title.trim().length < 2 || !roleId) return fail('ORG_VALIDATION');
   const supabase = await createServerSupabase();
   const { data: company } = await supabase.rpc('current_company_id');
   const { data, error } = await supabase
     .from('positions')
-    .insert({ company_id: company, org_unit_id: unitId, title: title.trim(), role_id: roleId, is_manager: isManager })
+    .insert({ company_id: company, org_unit_id: unitId, title: title.trim(), role_id: roleId, is_manager: isManager, show_phone_to_reports: isManager && showPhone })
     .select('id')
     .single();
   if (error || !data) return { ok: false, error: toArabicError(error) };
@@ -56,4 +56,12 @@ export async function createPosition(unitId: string, title: string, roleId: stri
 export async function createInvite(positionId: string, sentTo: string): Promise<Result<string>> {
   const supabase = await createServerSupabase();
   return callRpc<string>(supabase, 'create_invitation', { p_position: positionId, p_sent_to: sentTo || null, p_ttl_days: 7 });
+}
+
+export async function setShowPhone(positionId: string, value: boolean): Promise<Result<null>> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase.from('positions').update({ show_phone_to_reports: value }).eq('id', positionId).select('id');
+  if (error) return { ok: false, error: toArabicError(error) };
+  if (!data?.length) return fail('ORG_FORBIDDEN');
+  return done({ ok: true, data: null });
 }

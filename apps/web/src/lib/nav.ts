@@ -4,6 +4,7 @@ export type NavItem = { href: string; label: string };
 
 export function navItemsFor(b: ActorBundle): NavItem[] {
   const items: NavItem[] = [
+    { href: '/app/me', label: 'بياناتي' },
     { href: '/app/announcements', label: 'الأخبار والقرارات' },
     { href: '/app/structure', label: 'الهيكل التنظيمي' },
   ];

@@ -5,7 +5,7 @@ import type { ActorBundle } from '@/lib/actor-types';
 import type { TreeNode } from '@/lib/tree';
 import { assignableRoles } from '@/lib/roles';
 import { inviteUrl, whatsappShareUrl } from '@/lib/share';
-import { createInvite, createPosition } from '@/app/app/structure/actions';
+import { createInvite, createPosition, setShowPhone } from '@/app/app/structure/actions';
 import type { PositionDetail, RoleRow } from '@/components/org-tree';
 import { Button, ErrorText, Input } from '@/components/ui';
 
@@ -23,6 +23,7 @@ export function PositionsPanel({ node, bundle, details, roles, canManage, canInv
           {p.isManager ? <span className="text-xs text-amber-700">مدير</span> : null}
           <span className="text-slate-400">— {details[p.id]?.employeeName ?? 'شاغر'}</span>
           {!p.employeeId && canInvite ? <button className="text-xs text-teal-700" onClick={() => setInviteFor(p.id)}>دعوة</button> : null}
+          {p.isManager && canManage ? <PhoneToggle positionId={p.id} initial={details[p.id]?.showPhone ?? false} /> : null}
         </div>
       ))}
       {canManage ? (
@@ -37,11 +38,29 @@ export function PositionsPanel({ node, bundle, details, roles, canManage, canInv
   );
 }
 
+const PHONE_LABEL = 'إظهار رقم الجوال للموظفين التابعين';
+
+function PhoneToggle({ positionId, initial }: { positionId: string; initial: boolean }) {
+  const [on, setOn] = useState(initial);
+  const [pending, start] = useTransition();
+  return (
+    <label className="ms-auto flex items-center gap-1 text-xs text-slate-500" title={PHONE_LABEL}>
+      <input type="checkbox" aria-label={PHONE_LABEL} checked={on} disabled={pending} onChange={(e) => {
+        const v = e.target.checked;
+        setOn(v);
+        start(async () => { const r = await setShowPhone(positionId, v); if (!r.ok) setOn(!v); });
+      }} />
+      إظهار الجوال للتابعين
+    </label>
+  );
+}
+
 function NewPosition({ node, bundle, roles, onDone }: { node: TreeNode; bundle: ActorBundle; roles: RoleRow[]; onDone: () => void }) {
   const options = assignableRoles(roles.map((r) => ({ id: r.id, name: r.name, systemKey: r.system_key, permissions: r.role_permissions.map((x) => x.permission) })), bundle.grants);
   const [title, setTitle] = useState('');
   const [roleId, setRoleId] = useState(options.find((o) => o.systemKey === 'employee')?.id ?? '');
   const [isManager, setIsManager] = useState(false);
+  const [showPhone, setShowPhoneFlag] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   return (
@@ -51,9 +70,10 @@ function NewPosition({ node, bundle, roles, onDone }: { node: TreeNode; bundle: 
         {options.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
       </select>
       <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={isManager} onChange={(e) => setIsManager(e.target.checked)} />مدير هذه الوحدة</label>
+      {isManager ? <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={showPhone} onChange={(e) => setShowPhoneFlag(e.target.checked)} />{PHONE_LABEL}</label> : null}
       <ErrorText>{error}</ErrorText>
       <div className="flex gap-2">
-        <Button disabled={pending} onClick={() => start(async () => { const r = await createPosition(node.id, title, roleId, isManager); if (r.ok) onDone(); else setError(r.error); })}>حفظ</Button>
+        <Button disabled={pending} onClick={() => start(async () => { const r = await createPosition(node.id, title, roleId, isManager, showPhone); if (r.ok) onDone(); else setError(r.error); })}>حفظ</Button>
         <Button variant="ghost" onClick={onDone}>إلغاء</Button>
       </div>
     </div>

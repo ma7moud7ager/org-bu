@@ -14,10 +14,10 @@ const hrefs = (role: RoleKey) => navItemsFor(bundle(role)).map((i) => i.href);
 
 describe('navItemsFor', () => {
   it('employee sees announcements and structure only', () => {
-    expect(hrefs('employee')).toEqual(['/app/announcements', '/app/structure']);
+    expect(hrefs('employee')).toEqual(['/app/me', '/app/announcements', '/app/structure']);
   });
   it('company admin sees everything', () => {
-    expect(hrefs('company_admin')).toEqual(['/app/announcements', '/app/structure', '/app/employees', '/app/requests', '/app/roles']);
+    expect(hrefs('company_admin')).toEqual(['/app/me', '/app/announcements', '/app/structure', '/app/employees', '/app/requests', '/app/roles']);
   });
   it('hr gets incoming requests; branch manager gets my requests', () => {
     expect(hrefs('hr')).toContain('/app/requests');

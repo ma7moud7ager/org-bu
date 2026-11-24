@@ -8,7 +8,7 @@ import { Button, ErrorText, Input } from '@/components/ui';
 import { PositionsPanel } from '@/components/positions-panel';
 
 export type RoleRow = { id: string; name: string; system_key: string | null; role_permissions: { permission: string }[] };
-export type PositionDetail = { title: string; employeeName: string | null; roleId: string };
+export type PositionDetail = { title: string; employeeName: string | null; roleId: string; showPhone: boolean };
 
 const TYPE_LABEL: Record<OrgUnit['type'], string> = { branch: 'فرع', department: 'إدارة', section: 'قسم', team: 'فريق' };
 
