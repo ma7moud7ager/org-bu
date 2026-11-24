@@ -5,13 +5,19 @@ import { EMPLOYEES_LIST_SELECT } from '@/lib/queries';
 
 type Row = { id: string; full_name: string; phone: string; identity_last4: string | null; status: string; positions: { title: string; org_units: { name: string } | null } | null };
 
-export default async function EmployeesPage() {
+export default async function EmployeesPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+  const status = (await searchParams).status === 'terminated' ? 'terminated' : 'active';
   const supabase = await createServerSupabase();
-  const { data } = await supabase.from('employees').select(EMPLOYEES_LIST_SELECT).order('full_name');
+  const { data } = await supabase.from('employees').select(EMPLOYEES_LIST_SELECT).eq('status', status).order('full_name');
   const rows = (data ?? []) as unknown as Row[];
+  const tab = (s: string, label: string) => (
+    <Link href={s === 'active' ? '/app/employees' : '/app/employees?status=terminated'}
+      className={`rounded-lg px-3 py-1.5 text-sm ${status === s ? 'bg-teal-700 text-white' : 'bg-white text-slate-600 border border-slate-200'}`}>{label}</Link>
+  );
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold">الموظفين <span className="text-sm font-normal text-slate-400">({rows.length})</span></h1>
+      <div className="flex gap-2">{tab('active', 'نشط')}{tab('terminated', 'منتهية خدمتهم')}</div>
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-slate-500">
