@@ -3,10 +3,11 @@ import { routeFor, type SessionState } from '@/lib/routing';
 import { toLatinDigits } from '@/lib/phone';
 import { normalizeSaudiPhone } from '@orgbu/shared';
 
-const anon: SessionState = { userId: null, hasEmployee: false, isPlatformAdmin: false };
-const fresh: SessionState = { userId: 'u', hasEmployee: false, isPlatformAdmin: false };
-const member: SessionState = { userId: 'u', hasEmployee: true, isPlatformAdmin: false };
-const owner: SessionState = { userId: 'u', hasEmployee: false, isPlatformAdmin: true };
+const anon: SessionState = { userId: null, hasEmployee: false, isPlatformAdmin: false, isTerminated: false };
+const fresh: SessionState = { userId: 'u', hasEmployee: false, isPlatformAdmin: false, isTerminated: false };
+const member: SessionState = { userId: 'u', hasEmployee: true, isPlatformAdmin: false, isTerminated: false };
+const owner: SessionState = { userId: 'u', hasEmployee: false, isPlatformAdmin: true, isTerminated: false };
+const ended: SessionState = { userId: 'u', hasEmployee: false, isPlatformAdmin: false, isTerminated: true };
 
 describe('routeFor', () => {
   it('public paths are open', () => {
@@ -34,6 +35,21 @@ describe('routeFor', () => {
   });
   it('owner without employee may open onboarding? no — goes to admin from app paths', () => {
     expect(routeFor('/app', owner)).toBe('/admin/companies');
+  });
+});
+
+describe('terminated users', () => {
+  it('go to /ended, never onboarding', () => {
+    expect(routeFor('/app', ended)).toBe('/ended');
+    expect(routeFor('/onboarding', ended)).toBe('/ended');
+    expect(routeFor('/login', ended)).toBe('/ended');
+    expect(routeFor('/', ended)).toBe('/ended');
+    expect(routeFor('/ended', ended)).toBeNull();
+  });
+  it('/ended is not for others', () => {
+    expect(routeFor('/ended', member)).toBe('/app');
+    expect(routeFor('/ended', fresh)).toBe('/onboarding');
+    expect(routeFor('/ended', anon)).toBe('/login?next=%2Fended');
   });
 });
 

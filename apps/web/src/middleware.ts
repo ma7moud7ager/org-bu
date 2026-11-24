@@ -6,13 +6,15 @@ export async function middleware(req: NextRequest) {
   const { response, supabase, userId } = await updateSession(req);
   let hasEmployee = false;
   let isPlatformAdmin = false;
+  let isTerminated = false;
   if (userId) {
     const { data } = await supabase.rpc('session_state');
-    const row = (data as Array<{ has_employee: boolean; is_platform_admin: boolean }> | null)?.[0];
+    const row = (data as Array<{ has_employee: boolean; is_platform_admin: boolean; is_terminated: boolean }> | null)?.[0];
     hasEmployee = row?.has_employee === true;
     isPlatformAdmin = row?.is_platform_admin === true;
+    isTerminated = row?.is_terminated === true;
   }
-  const target = routeFor(req.nextUrl.pathname, { userId, hasEmployee, isPlatformAdmin });
+  const target = routeFor(req.nextUrl.pathname, { userId, hasEmployee, isPlatformAdmin, isTerminated });
   if (target) return NextResponse.redirect(new URL(target, req.url));
   return response();
 }
