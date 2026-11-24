@@ -1,0 +1,70 @@
+name: Android APK
+# Builds the org BU app (Capacitor shell) and publishes the APK on the website at /downloads/org-bu.apk.
+
+on:
+  push:
+    branches: [main]
+    paths: ["apps/mobile/**", ".github/workflows/android.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Sync native project
+        working-directory: apps/mobile
+        run: |
+          npm ci
+          node prepare.js
+          npx cap sync android
+
+      - name: Build APK
+        working-directory: apps/mobile/android
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | tee ../../../build.log
+          test ${PIPESTATUS[0]} -eq 0
+
+      - name: Publish APK to the website
+        run: |
+          mkdir -p apps/web/public/downloads
+          cp apps/mobile/android/app/build/outputs/apk/release/app-release.apk apps/web/public/downloads/org-bu.apk
+          echo "{\"version\":\"1.0.${{ github.run_number }}\",\"build\":${{ github.run_number }}}" > apps/web/public/downloads/version.json
+          git config user.name "orgbu-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add apps/web/public/downloads/org-bu.apk apps/web/public/downloads/version.json
+          git commit -m "Android APK build ${GITHUB_SHA::7}" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Save build log on failure
+        if: failure()
+        run: |
+          git config user.name "orgbu-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout --orphan build-logs
+          git rm -rf --cached . > /dev/null
+          [ -f build.log ] || echo "failed before gradle step" > build.log
+          git add -f build.log
+          git commit -m "build log ${GITHUB_SHA::7}"
+          git push -f origin build-logs

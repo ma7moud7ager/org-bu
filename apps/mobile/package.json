@@ -1,0 +1,23 @@
+{
+  "name": "orgbu-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "org BU Android/iOS app (Capacitor shell around the hosted platform)",
+  "scripts": {
+    "sync": "node prepare.js && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.2",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/browser": "8.0.5",
+    "@capacitor/core": "8.6.2",
+    "@capacitor/device": "8.0.3",
+    "@capacitor/geolocation": "8.2.5",
+    "@capacitor/ios": "8.6.2",
+    "@capacitor/push-notifications": "8.1.3",
+    "@capgo/capacitor-native-biometric": "8.9.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.2"
+  }
+}

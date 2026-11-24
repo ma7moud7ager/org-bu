@@ -1,0 +1,17 @@
+{
+  "appId": "com.orgbu.app",
+  "appName": "org BU",
+  "webDir": "www",
+  "server": {
+    "url": "https://org-bu.mahmoud-m-hager.workers.dev/app",
+    "androidScheme": "https",
+    "allowNavigation": ["org-bu.mahmoud-m-hager.workers.dev"],
+    "errorPath": "index.html"
+  },
+  "android": {
+    "backgroundColor": "#f8fafc"
+  },
+  "plugins": {
+    "PushNotifications": { "presentationOptions": ["badge", "sound", "alert"] }
+  }
+}

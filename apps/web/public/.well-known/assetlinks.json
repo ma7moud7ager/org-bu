@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.orgbu.app",
+      "sha256_cert_fingerprints": ["FA:0F:D8:94:56:71:7C:68:82:83:03:C1:DA:65:25:F2:29:5B:C4:40:DD:8D:86:9F:7E:8B:FC:52:5B:03:CE:A4"]
+    }
+  }
+]
