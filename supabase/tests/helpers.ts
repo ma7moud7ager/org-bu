@@ -57,3 +57,14 @@ export async function errorOf(p: Promise<unknown>): Promise<string | null> {
     return (e as Error).message;
   }
 }
+
+/** Runs fn as the database owner (like pg_cron / migrations), with empty JWT claims. */
+export async function asOwner<T>(fn: (c: pg.PoolClient) => Promise<T>): Promise<T> {
+  const c = await db().connect();
+  try {
+    await c.query(`select set_config('request.jwt.claims', '{}', false)`);
+    return await fn(c);
+  } finally {
+    c.release();
+  }
+}

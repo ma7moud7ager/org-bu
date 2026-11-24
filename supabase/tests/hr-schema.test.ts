@@ -1,16 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { asService, db, resetDb } from './helpers';
+import { asOwner, asService, db, resetDb } from './helpers';
 import { seedCompany, addEmployee } from './fixtures';
-
-async function asOwner(sql: string): Promise<void> {
-  const c = await db().connect();
-  try {
-    await c.query(`select set_config('request.jwt.claims', '{}', false)`);
-    await c.query(sql);
-  } finally {
-    c.release();
-  }
-}
 
 describe('phase 2a schema', () => {
   beforeEach(resetDb);
@@ -56,7 +46,7 @@ describe('phase 2a schema', () => {
        ('employees.transfer','requests.decide','employees.request_terminate','employees.request_transfer')`,
       [[co.roles.hr, co.roles.branch_manager, co.roles.company_admin]],
     ));
-    await asOwner('select private.backfill_role_grants()');
+    await asOwner((c) => c.query('select private.backfill_role_grants()'));
     const r = await db().query<{ role_id: string; permission: string; scope: string }>(
       `select role_id, permission, scope from role_permissions where role_id = any($1) and permission in
        ('employees.transfer','requests.decide','employees.request_terminate','employees.request_transfer')`,
@@ -68,7 +58,7 @@ describe('phase 2a schema', () => {
       'hr:employees.transfer:company', 'hr:requests.decide:company',
     ]);
     // idempotent
-    await asOwner('select private.backfill_role_grants()');
+    await asOwner((c) => c.query('select private.backfill_role_grants()'));
   });
 
   it('today_riyadh() is the Riyadh calendar date', async () => {
