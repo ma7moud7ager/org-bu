@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { asOwner, asUser, db, resetDb } from './helpers';
+import { asOwner, asService, asUser, db, resetDb } from './helpers';
 import { seedCompany, addEmployee } from './fixtures';
 
 describe('push dispatch', () => {
@@ -20,5 +20,18 @@ describe('push dispatch', () => {
     const co = await seedCompany();
     const a = await addEmployee(co, co.rootId, 'company_admin', { isManager: true });
     await expect(asUser(a.userId, (c) => c.query('select * from private.internal_config'))).rejects.toThrow(/permission denied/);
+  });
+});
+
+describe('check_push_secret', () => {
+  beforeEach(resetDb);
+  it('only the service role can check, and only the stored secret passes', async () => {
+    await asOwner((c) => c.query(`insert into private.internal_config (key, value) values ('push_secret','s3cret')`));
+    const ok = (s: string) => asService((c) => c.query('select check_push_secret($1) as ok', [s])).then((r) => r.rows[0]!.ok);
+    expect(await ok('s3cret')).toBe(true);
+    expect(await ok('nope')).toBe(false);
+    const co = await seedCompany();
+    const a = await addEmployee(co, co.rootId, 'company_admin', { isManager: true });
+    await expect(asUser(a.userId, (c) => c.query(`select check_push_secret('s3cret')`))).rejects.toThrow(/permission denied/);
   });
 });

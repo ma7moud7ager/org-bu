@@ -1,5 +1,5 @@
 // Sends one notification to the user's bound phone through Firebase Cloud Messaging (HTTP v1).
-// Called only by the database (trigger → pg_net) with the shared secret in x-push-secret.
+// Called only by the database (trigger → pg_net) with the secret from private.internal_config in x-push-secret.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { notificationView } from './notification-view.ts';
 
@@ -35,11 +35,12 @@ async function accessToken(sa: ServiceAccount): Promise<string> {
 }
 
 Deno.serve(async (req) => {
-  if (req.headers.get('x-push-secret') !== Deno.env.get('PUSH_SECRET')) return new Response('unauthorized', { status: 401 });
+  const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+  const { data: allowed } = await db.rpc('check_push_secret', { p_secret: req.headers.get('x-push-secret') ?? '' });
+  if (allowed !== true) return new Response('unauthorized', { status: 401 });
   const saJson = Deno.env.get('FCM_SERVICE_ACCOUNT');
   if (!saJson) return new Response('push disabled', { status: 200 });
   const { notification_id } = await req.json();
-  const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
   const { data: n } = await db.from('notifications').select('id, user_id, type, payload').eq('id', notification_id).maybeSingle();
   if (!n) return new Response('no notification', { status: 200 });

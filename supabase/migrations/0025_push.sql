@@ -41,3 +41,13 @@ create trigger notifications_push after insert on public.notifications
 
 revoke execute on function private.dispatch_push(uuid) from public, anon, authenticated;
 revoke execute on function private.notifications_push_trigger() from public, anon, authenticated;
+
+-- The Edge Function (service role) verifies the caller's secret without the secret living in two places.
+create or replace function public.check_push_secret(p_secret text)
+returns boolean
+language sql stable security definer set search_path = public, extensions
+as $$
+  select exists (select 1 from private.internal_config where key = 'push_secret' and value = p_secret)
+$$;
+revoke execute on function public.check_push_secret(text) from public, anon, authenticated;
+grant execute on function public.check_push_secret(text) to service_role;
