@@ -17,7 +17,13 @@ describe('navItemsFor', () => {
     expect(hrefs('employee')).toEqual(['/app/announcements', '/app/structure']);
   });
   it('company admin sees everything', () => {
-    expect(hrefs('company_admin')).toEqual(['/app/announcements', '/app/structure', '/app/employees', '/app/roles']);
+    expect(hrefs('company_admin')).toEqual(['/app/announcements', '/app/structure', '/app/employees', '/app/requests', '/app/roles']);
+  });
+  it('hr gets incoming requests; branch manager gets my requests', () => {
+    expect(hrefs('hr')).toContain('/app/requests');
+    expect(hrefs('hr')).not.toContain('/app/requests/mine');
+    expect(hrefs('branch_manager')).toContain('/app/requests/mine');
+    expect(hrefs('branch_manager')).not.toContain('/app/requests');
   });
   it('finance sees employees', () => {
     expect(hrefs('finance')).toContain('/app/employees');

@@ -140,3 +140,30 @@ describe('requests engine', () => {
     expect((await req(id)).status).toBe('pending');
   });
 });
+
+describe('request_list()', () => {
+  beforeEach(resetDb);
+  it('lists incoming for deciders and mine for requesters, with names even after termination', async () => {
+    const co = await seedCompany();
+    await addEmployee(co, co.rootId, 'company_admin', { isManager: true });
+    const hrUnit = await addUnit(co.companyId, co.rootId, 'department', 'الموارد البشرية');
+    const hr = await addEmployee(co, hrUnit, 'hr');
+    const b1 = await addUnit(co.companyId, co.rootId, 'branch', 'فرع 1');
+    const bm = await addEmployee(co, b1, 'branch_manager', { isManager: true });
+    const w = await addEmployee(co, b1, 'employee');
+    const target = await asService(async (c) =>
+      (await c.query<{ id: string }>(`insert into positions (company_id, org_unit_id, title, role_id) values ($1,$2,'كاشير',$3) returning id`,
+        [co.companyId, b1, co.roles.employee])).rows[0]!.id);
+    const id = await submit(bm, 'transfer', w.employeeId, { target_position: target });
+    const list = (u: SeededEmployee, mine: boolean) =>
+      asUser(u.userId, (c) => c.query('select request_list($1) as l', [mine])).then((r) => r.rows[0]!.l);
+    const incoming = await list(hr, false);
+    expect(incoming).toHaveLength(1);
+    expect(incoming[0]).toMatchObject({ id, status: 'pending', subject_name: `موظف ${w.phone}`, requester_name: `موظف ${bm.phone}`, target_label: 'كاشير — فرع 1' });
+    expect(await list(bm, false)).toEqual([]);
+    expect(await list(bm, true)).toHaveLength(1);
+    expect(await list(w, true)).toEqual([]);
+    await asUser(hr.userId, (c) => c.query(`select terminate_employee($1,'resignation','',today_riyadh())`, [w.employeeId]));
+    expect((await list(bm, true))[0].subject_name).toBe(`موظف ${w.phone}`);
+  });
+});

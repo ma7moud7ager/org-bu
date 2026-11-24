@@ -2,7 +2,7 @@
 import { useEffect, useReducer, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserSupabase } from '@/lib/supabase/browser';
-import { applyNotificationEvent, unreadCount, type Notif, type NotifEvent } from '@/lib/notifications';
+import { applyNotificationEvent, notificationView, unreadCount, type Notif, type NotifEvent } from '@/lib/notifications';
 
 type Action = { type: 'reset'; list: Notif[] } | { type: 'event'; ev: NotifEvent };
 const reducer = (s: Notif[], a: Action) => (a.type === 'reset' ? a.list : applyNotificationEvent(s, a.ev));
@@ -32,8 +32,8 @@ export function NotificationBell({ userId }: { userId: string }) {
       dispatch({ type: 'event', ev: { eventType: 'UPDATE', new: { ...n, read_at } } });
       await createBrowserSupabase().from('notifications').update({ read_at }).eq('id', n.id);
     }
-    const id = (n.payload as { announcement_id?: string }).announcement_id;
-    if (n.type === 'announcement' && id) router.push(`/app/announcements#${id}`);
+    const { href } = notificationView(n);
+    if (href) router.push(href);
   }
 
   const count = unreadCount(list);
@@ -50,8 +50,7 @@ export function NotificationBell({ userId }: { userId: string }) {
             {list.map((n) => (
               <li key={n.id}>
                 <button onClick={() => openItem(n)} className={`block w-full px-4 py-3 text-start text-sm hover:bg-slate-50 ${n.read_at ? 'text-slate-500' : 'font-medium'}`}>
-                  {(n.payload as { kind?: string }).kind === 'decision' ? 'قرار جديد: ' : 'خبر جديد: '}
-                  {(n.payload as { title?: string }).title}
+                  {notificationView(n).text}
                 </button>
               </li>
             ))}
