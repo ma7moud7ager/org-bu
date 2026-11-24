@@ -9,7 +9,7 @@ describe('push dispatch', () => {
     const a = await addEmployee(co, co.rootId, 'company_admin', { isManager: true });
     const b = await addEmployee(co, co.rootId, 'employee');
     await asUser(a.userId, (c) => c.query(`select publish_announcement('news','عنوان','نص',null,false)`));
-    await asOwner((c) => c.query(`insert into private.internal_config (key, value) values ('push_url','https://x.invalid/push'), ('push_secret','s')`));
+    await asOwner((c) => c.query(`delete from private.internal_config; insert into private.internal_config (key, value) values ('push_url','https://x.invalid/push'), ('push_secret','s')`));
     await asUser(a.userId, (c) => c.query(`select publish_announcement('news','عنوان 2','نص',null,false)`));
     const n = await db().query(`select count(*)::int as n from notifications where user_id = $1`, [b.userId]);
     expect(n.rows[0]!.n).toBe(2);
@@ -26,7 +26,7 @@ describe('push dispatch', () => {
 describe('check_push_secret', () => {
   beforeEach(resetDb);
   it('only the service role can check, and only the stored secret passes', async () => {
-    await asOwner((c) => c.query(`insert into private.internal_config (key, value) values ('push_secret','s3cret')`));
+    await asOwner((c) => c.query(`delete from private.internal_config; insert into private.internal_config (key, value) values ('push_secret','s3cret')`));
     const ok = (s: string) => asService((c) => c.query('select check_push_secret($1) as ok', [s])).then((r) => r.rows[0]!.ok);
     expect(await ok('s3cret')).toBe(true);
     expect(await ok('nope')).toBe(false);
