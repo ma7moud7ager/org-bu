@@ -4,11 +4,13 @@ import { loadActor } from '@/lib/actor';
 import { navItemsFor } from '@/lib/nav';
 import { Sidebar } from '@/components/sidebar';
 import { NotificationBell } from '@/components/notification-bell';
+import { NativeProvider } from '@/components/native-boot';
 
 export default async function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const bundle = await loadActor();
   if (!bundle) redirect('/onboarding');
   return (
+    <NativeProvider>
     <div className="flex min-h-screen">
       <Sidebar items={navItemsFor(bundle)} companyName={bundle.companyName} userName={bundle.employee.fullName} />
       <div className="flex-1">
@@ -17,5 +19,6 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
         <main className="p-6">{children}</main>
       </div>
     </div>
+    </NativeProvider>
   );
 }
